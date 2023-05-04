@@ -24,9 +24,7 @@
 
 # 📖 [Vet-Clinic Database] <a name="about-project"></a>
 
-This is a project about creating the data structure for a vet clinic using a relational database. Database contains tables of animals, animals' owners, clinic employees and visits. Built with PostgresSQL.
-
-**[Vet-Clinic Database]** is a...
+**[Vet-Clinic Database]** is a project about creating the data structure for a vet clinic using a relational database. Database contains tables of animals, animals' owners, clinic employees and visits. Built with PostgresSQL.
 
 ## 🛠 Built With <a name="built-with"></a>
 
