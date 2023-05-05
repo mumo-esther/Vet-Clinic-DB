@@ -13,3 +13,51 @@ CREATE TABLE animals (
 );
 
 ALTER TABLE animals ADD COLUMN species varchar(50) NOT NULL;
+
+CREATE TABLE owners (
+    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100),
+    age INTEGER
+);
+
+CREATE TABLE species (
+    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50)
+);
+
+ALTER TABLE animals
+    DROP COLUMN species,
+    ADD COLUMN species_id INTEGER,
+    ADD COLUMN owner_id INTEGER,
+    MODIFY COLUMN id INTEGER NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE animals
+    ADD CONSTRAINT fk_species_id FOREIGN KEY (species_id)
+        REFERENCES species(id),
+    ADD CONSTRAINT fk_owner_id FOREIGN KEY (owner_id)
+        REFERENCES owners(id);
+
+CREATE TABLE vets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name varchar(255),
+  age INTEGER,
+  date_of_graduation DATE
+);
+
+CREATE TABLE specializations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vet_id INTEGER,
+  species_id INTEGER,
+  FOREIGN KEY (vet_id) REFERENCES vets (id),
+  FOREIGN KEY (species_id) REFERENCES species (id)
+);
+
+CREATE TABLE visits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vet_id INTEGER,
+  animal_id INTEGER,
+  visit_date DATE,
+  FOREIGN KEY (vet_id) REFERENCES vets (id),
+  FOREIGN KEY (animal_id) REFERENCES animals (id)
+);
+
