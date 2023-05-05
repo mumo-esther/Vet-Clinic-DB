@@ -39,7 +39,7 @@ ALTER TABLE animals
 
 CREATE TABLE vets (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT,
+  name varchar(255),
   age INTEGER,
   date_of_graduation DATE
 );
