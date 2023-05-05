@@ -35,17 +35,6 @@ VALUES ('Agumon', '2020-02-03', 0, false, 10.23),
        ('Pikachu', '2021-01-07', 1, false, 15.04),
        ('Devimon', '2017-05-12', 5, true, 11);
 
-
-SELECT * FROM animals LIMIT 3;
-SELECT * FROM animals WHERE name LIKE '%mon';
-SELECT name FROM animals WHERE date_of_birth BETWEEN '2016-01-01' AND '2019-12-31';
-SELECT name FROM animals WHERE neutered = true AND escape_attempts < 3;
-SELECT date_of_birth FROM animals WHERE name IN ('Agumon', 'Pikachu');
-SELECT name, escape_attempts FROM animals WHERE weight_kg > 10.5;
-SELECT * FROM animals WHERE neutered = true;
-SELECT * FROM animals WHERE name != 'Gabumon';
-SELECT * FROM animals WHERE weight_kg BETWEEN 10.4 AND 17.3;
-
 INSERT INTO animals (name, date_of_birth, escape_attempts, neutered, weight_kg, species) 
 VALUES 
 ('Charmander', '2020-02-08', 0, false, -11, ''),
@@ -56,91 +45,7 @@ VALUES
 ('Blossom', '1998-10-13', 3, true, 17, ''),
 ('Ditto', '2022-05-14', 4, true, 22, '');
 
-SELECT * FROM animals;
 
-
-START TRANSACTION;
-SET SQL_SAFE_UPDATES = 0;
-UPDATE animals SET species = 'unspecified';
-SELECT * FROM animals;  -- verify that the change was made
-ROLLBACK;
-SELECT * FROM animals;  -- verify that the change was rolled back
-SET SQL_SAFE_UPDATES = 0;
-SELECT * FROM animals;
-
-START TRANSACTION;
-UPDATE animals SET species = 'digimon' WHERE name LIKE '%mon';
-UPDATE animals SET species = 'pokemon' WHERE species = '';
-COMMIT;
-SELECT * FROM animals;
-SELECT * FROM animals WHERE species = 'pokemon';
-
-START TRANSACTION;
-DELETE FROM animals;
-ROLLBACK;
-SELECT * FROM animals;
-
-START TRANSACTION;
-DELETE FROM animals WHERE date_of_birth > '2022-01-01';
-SAVEPOINT sp;
-UPDATE animals SET weight_kg = -1 * weight_kg;
-ROLLBACK TO sp;
-UPDATE animals SET weight_kg = -1 * weight_kg WHERE weight_kg < 0;
-COMMIT;
-SELECT * FROM animals;
-
-SELECT COUNT(*) FROM animals;
-
-SELECT COUNT(*) FROM animals WHERE escape_attempts = 0;
-
-SELECT AVG(weight_kg) FROM animals;
-
-SELECT neutered, AVG(escape_attempts) as avg_escape_attempts
-FROM animals
-GROUP BY neutered
-ORDER BY avg_escape_attempts DESC
-LIMIT 1;
-
-SELECT species, MIN(weight_kg) as min_weight, MAX(weight_kg) as max_weight
-FROM animals
-GROUP BY species;
-
-SELECT species, AVG(escape_attempts) as avg_escape_attempts
-FROM animals
-WHERE date_of_birth BETWEEN '1990-01-01' AND '2000-12-31'
-GROUP BY species;
-
-
-SELECT * FROM animals;
-
-CREATE TABLE owners (
-    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    full_name VARCHAR(100),
-    age INTEGER
-);
-CREATE TABLE species (
-    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50)
-);
-
-ALTER TABLE animals
-    DROP COLUMN species,
-    ADD COLUMN species_id INTEGER,
-    ADD COLUMN owner_id INTEGER,
-    MODIFY COLUMN id INTEGER NOT NULL AUTO_INCREMENT;
-
-ALTER TABLE animals
-    ADD CONSTRAINT fk_species_id FOREIGN KEY (species_id)
-        REFERENCES species(id),
-    ADD CONSTRAINT fk_owner_id FOREIGN KEY (owner_id)
-        REFERENCES owners(id);
-
-INSERT INTO owners (full_name, age)
-VALUES ('Sam Smith', 34), ('Jennifer Orwell', 19), ('Bob', 45), ('Melody Pond', 77), ('Dean Winchester', 14), ('Jodie Whittaker', 38);
-
-INSERT INTO species (name) VALUES ('Pokemon'), ('Digimon');
--- find owner_ids
-SELECT id, full_name FROM owners;
 INSERT INTO animals (name, date_of_birth, escape_attempts, neutered, weight_kg, species_id, owner_id)
 VALUES 
 ('Agumon', '2020-02-03', 0, false, 10.23, 2, 1),
@@ -155,5 +60,134 @@ VALUES
 ('Blossom', '1998-10-13', 3, true, 17, 1, 4),
 ('Ditto', '2022-05-14', 4, true, 22, 1, null);
 
-SELECT * FROM OWNERS;
+INSERT INTO owners (full_name, age)
+VALUES ('Sam Smith', 34), ('Jennifer Orwell', 19), ('Bob', 45), ('Melody Pond', 77), ('Dean Winchester', 14), ('Jodie Whittaker', 38);
 
+INSERT INTO species (name) VALUES ('Pokemon'), ('Digimon');
+
+INSERT INTO visits (animal_id, vet_id, date_of_visit)
+VALUES
+(1, 1, '2020-05-24'),
+(1, 3, '2020-07-22'),
+(2, 4, '2021-02-02'),
+(3, 2, '2020-01-05'),
+(3, 2, '2020-03-08'),
+(3, 2, '2020-05-14'),
+(4, 3, '2021-05-04'),
+(5, 4, '2021-02-24'),
+(6, 2, '2019-12-21'),
+(6, 1, '2020-08-10'),
+(6, 2, '2021-04-07'),
+(7, 3, '2019-09-29'),
+(8, 4, '2020-10-03'),
+(8, 4, '2020-11-04'),
+(9, 2, '2019-01-24'),
+(9, 2, '2019-05-15'),
+(9, 2, '2020-02-27'),
+(9, 2, '2020-08-03'),
+(10, 3, '2020-05-24'),
+(10, 1, '2021-01-11');
+
+
+
+
+
+User
+Write queries to answer the following:
+Who was the last animal seen by William Tatcher?
+How many different animals did Stephanie Mendez see?
+List all vets and their specialties, including vets with no specialties.
+List all animals that visited Stephanie Mendez between April 1st and August 30th, 2020.
+What animal has the most visits to vets?
+Who was Maisy Smith's first visit?
+Details for most recent visit: animal information, vet information, and date of visit.
+How many visits were with a vet that did not specialize in that animal's species?
+What specialty should Maisy Smith consider getting? Look for the species she gets the most.
+ChatGPT
+To answer these questions, we can use the following queries:
+
+Who was the last animal seen by William Tatcher?
+vbnet
+Copy code
+SELECT animals.name
+FROM animals
+JOIN visits ON animals.id = visits.animal_id
+JOIN vets ON visits.vet_id = vets.id
+WHERE vets.name = 'William Tatcher'
+ORDER BY visits.date_of_visit DESC
+LIMIT 1;
+This query joins the animals, visits, and vets tables, and filters by visits made by William Tatcher. It orders the results by the date of visit in descending order, so that the most recent visit comes first, and limits the output to the first row, which is the most recent visit. Finally, it selects the name of the animal seen during that visit.
+
+How many different animals did Stephanie Mendez see?
+sql
+Copy code
+SELECT COUNT(DISTINCT visits.animal_id)
+FROM visits
+JOIN vets ON visits.vet_id = vets.id
+WHERE vets.name = 'Stephanie Mendez';
+This query joins the visits and vets tables, filters by visits made by Stephanie Mendez, and uses the COUNT DISTINCT function to count the number of unique animal IDs in the resulting set.
+
+List all vets and their specialties, including vets with no specialties.
+vbnet
+Copy code
+SELECT vets.name, specialties.name
+FROM vets
+LEFT JOIN specializations ON vets.id = specializations.vet_id
+LEFT JOIN species ON specializations.species_id = species.id
+ORDER BY vets.name, specialties.name;
+This query left joins the vets table with the specializations and species tables to include vets with no specialties. It selects the name of each vet and their corresponding specialty name, if applicable, and orders the results alphabetically by vet name and then by specialty name.
+
+List all animals that visited Stephanie Mendez between April 1st and August 30th, 2020.
+sql
+Copy code
+SELECT animals.name
+FROM animals
+JOIN visits ON animals.id = visits.animal_id
+JOIN vets ON visits.vet_id = vets.id
+WHERE vets.name = 'Stephanie Mendez' AND visits.date_of_visit BETWEEN '2020-04-01' AND '2020-08-30';
+This query joins the animals, visits, and vets tables, and filters by visits made by Stephanie Mendez between April 1st and August 30th, 2020. It selects the name of the animal seen during each visit.
+
+What animal has the most visits to vets?
+vbnet
+Copy code
+SELECT animals.name, COUNT(visits.id) AS num_visits
+FROM animals
+JOIN visits ON animals.id = visits.animal_id
+GROUP BY animals.id
+ORDER BY num_visits DESC
+LIMIT 1;
+
+INSERT INTO vets (name, age, date_of_graduation) VALUES ('William Tatcher', 45, '2000-04-23');
+INSERT INTO vets (name, age, date_of_graduation) VALUES ('Maisy Smith', 26, '2019-01-17');
+INSERT INTO vets (name, age, date_of_graduation) VALUES ('Stephanie Mendez', 64, '1981-05-04');
+INSERT INTO vets (name, age, date_of_graduation) VALUES ('Jack Harkness', 38, '2008-06-08');
+
+INSERT INTO specializations (vet_id, species_id) VALUES 
+(1, 1), 
+(3, 1), 
+(3, 2), 
+(4, 2);
+
+
+INSERT INTO visits (animal_id, vet_id, date_of_visit)
+VALUES
+(1, 1, '2020-05-24'),
+(1, 3, '2020-07-22'),
+(2, 4, '2021-02-02'),
+(3, 2, '2020-01-05'),
+(3, 2, '2020-03-08'),
+(3, 2, '2020-05-14'),
+(4, 3, '2021-05-04'),
+(5, 4, '2021-02-24'),
+(6, 2, '2019-12-21'),
+(6, 1, '2020-08-10'),
+(6, 2, '2021-04-07'),
+(7, 3, '2019-09-29'),
+(8, 4, '2020-10-03'),
+(8, 4, '2020-11-04'),
+(9, 2, '2019-01-24'),
+(9, 2, '2019-05-15'),
+(9, 2, '2020-02-27'),
+(9, 2, '2020-08-03'),
+(10, 3, '2020-05-24'),
+(10, 1, '2021-01-11');

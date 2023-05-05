@@ -36,3 +36,28 @@ ALTER TABLE animals
         REFERENCES species(id),
     ADD CONSTRAINT fk_owner_id FOREIGN KEY (owner_id)
         REFERENCES owners(id);
+
+CREATE TABLE vets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  age INTEGER,
+  date_of_graduation DATE
+);
+
+CREATE TABLE specializations (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vet_id INTEGER,
+  species_id INTEGER,
+  FOREIGN KEY (vet_id) REFERENCES vets (id),
+  FOREIGN KEY (species_id) REFERENCES species (id)
+);
+
+CREATE TABLE visits (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  vet_id INTEGER,
+  animal_id INTEGER,
+  visit_date DATE,
+  FOREIGN KEY (vet_id) REFERENCES vets (id),
+  FOREIGN KEY (animal_id) REFERENCES animals (id)
+);
+
